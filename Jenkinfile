@@ -1,0 +1,46 @@
+pipeline {
+  agent { label 'linux-agent' }   // use your Jenkins agent label here (e.g., 'master' or 'linux-agent')
+
+  stages {
+    stage('Checkout') {
+      steps {
+        git branch: 'main', url: 'https://github.com/sivagopaluni5989/maven.git'
+      }
+    }
+
+    stage('Build') {
+      steps {
+        sh 'mvn clean package'
+      }
+    }
+
+    stage('Test') {
+      steps {
+        sh 'mvn test'
+      }
+    }
+
+    stage('Code Analysis (SonarQube)') {
+      steps {
+        withSonarQubeEnv('SonarQubeServer') {  // replace with your SonarQube server name in Jenkins config
+          sh 'mvn sonar:sonar'
+        }
+      }
+    }
+
+    stage('Deploy') {
+      steps {
+        echo 'Deploying the application...'
+        // Example deployment step:
+        // sh './deploy.sh'
+      }
+    }
+  }
+
+  post {
+    always {
+      echo 'Cleaning workspace...'
+      cleanWs()
+    }
+  }
+}
